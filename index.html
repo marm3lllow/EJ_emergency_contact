@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emergency Contact Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function() {
+      emailjs.init({ publicKey: "BuI7ufTMtOxv_G-yh" });
+    })();
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #0b2f1d;
+      --red:    #E8293B;
+      --blue:   #4A90D9;
+      --bg:     #F5F7FA;
+      --white:  #FFFFFF;
+      --muted:  #6B7A90;
+      --border: #DDE3ED;
+      --green:  #1DB97A;
+      --orange: #E67E22;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--navy);
+      min-height: 100vh;
+      padding-bottom: 48px;
+    }
+
+    /* ── ALERT BANNER ── */
+    .alert-banner {
+      background: var(--red);
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      position: relative;
+      overflow: hidden;
+    }
+    .alert-banner.offline {
+      background: var(--muted);
+    }
+    .alert-banner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      animation: shimmer 2.4s infinite;
+    }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+
+    .pulse-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: white;
+      flex-shrink: 0;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100%{ opacity:1; transform:scale(1); }
+      50%{ opacity:0.4; transform:scale(1.5); }
+    }
+
+    .alert-time { font-weight: 400; font-size: 12px; margin-left: auto; opacity: 0.85; }
+
+    /* ── HEADER ── */
+    .profile-header {
+      background: var(--navy);
+      padding: 32px 20px 28px;
+      color: white;
+      position: relative;
+    }
+    .profile-header::before {
+      content: 'EMERGENCY PROFILE';
+      position: absolute;
+      top: 16px; right: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #ffffff;
+      opacity: 0.8;
+    }
+
+    .profile-avatar-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .profile-photo {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .profile-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .profile-subtitle {
+      font-size: 14px;
+      color: rgba(255,255,255,0.82);
+      line-height: 1.4;
+      max-width: 320px;
+    }
+
+    /* ── MAIN ── */
+    .main { max-width: 600px; margin: 0 auto; padding: 20px 16px 0; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(11,30,61,0.06);
+    }
+
+    .card-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── INFO GRID ── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .info-item { display: flex; flex-direction: column; gap: 3px; }
+    .info-item.full { grid-column: 1 / -1; }
+    .info-key {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .info-value {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--navy);
+      line-height: 1.4;
+    }
+
+    /* ── CONTACT CARD ── */
+    .contact-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      margin-bottom: 10px;
+    }
+    .contact-card:last-of-type { margin-bottom: 0; }
+
+    .contact-icon {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .contact-icon.primary   { background: rgba(29,185,122,0.12); }
+    .contact-icon.secondary { background: rgba(74,144,217,0.12); }
+
+    .contact-info { flex: 1; min-width: 0; }
+    .contact-name     { font-weight: 600; font-size: 15px; }
+    .contact-relation { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .contact-phone    { font-size: 13px; color: var(--blue); margin-top: 4px; font-weight: 500; }
+
+    .contact-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 3px 8px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .tag-primary   { background: rgba(29,185,122,0.12); color: var(--green); }
+    .tag-secondary { background: rgba(74,144,217,0.12); color: var(--blue); }
+
+    .call-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      margin-top: 12px;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .call-btn:hover { opacity: 0.85; }
+    .call-btn.green { background: var(--green); color: white; }
+    .call-btn.blue  { background: var(--blue);  color: white; }
+
+    /* ── INSTITUTIONAL ── */
+    .inst-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .inst-row:last-child  { border-bottom: none; padding-bottom: 0; }
+    .inst-row:first-child { padding-top: 0; }
+
+    .inst-icon  { font-size: 20px; margin-top: 1px; }
+    .inst-info  { flex: 1; }
+    .inst-label { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .inst-value { font-size: 14px; font-weight: 500; color: var(--navy); margin-top: 1px; }
+    .inst-sub   { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+    /* ── EMAIL STATUS ── */
+    .email-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #EBF8F2;
+      border: 1px solid #A8E6CF;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #0D6E45;
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+    .email-status.offline {
+      background: #FFF3CD;
+      border-color: #FFEEBA;
+      color: #856404;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .alert-banner::after, .pulse-dot { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ALERT BANNER -->
+<div id="alertBanner" class="alert-banner">
+  <div class="pulse-dot"></div>
+  <span id="bannerText">QR Scanned — Profile Owner Has Been Notified</span>
+  <span class="alert-time" id="scanTime"></span>
+</div>
+
+<!-- PROFILE HEADER -->
+<div class="profile-header">
+  <div class="profile-avatar-row">
+    <img src="EJ.jfif" alt="Elishua Jude Rosales" class="profile-photo">
+    <div class="profile-info">
+      <div class="profile-name">Elishua Jude Rosales</div>
+      <div class="profile-subtitle"> Grade 5 – Luna</div>
+      <div class="profile-subtitle"> Tagumpay Elementary School</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- EMAIL SENT NOTICE -->
+  <div id="emailStatus" class="email-status">
+    ✅ An alert email has been sent to the profile owner and emergency contacts.
+  </div>
+
+  <!-- PERSONAL INFORMATION -->
+  <div class="card">
+    <div class="card-label">Personal Information</div>
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-key">Full Name</span>
+        <span class="info-value">Elishua Jude Rosales</span>
+      </div>
+      <div class="info-item">
+        <span class="info-key">Date of Birth</span>
+        <span class="info-value">November 01, 2015</span>
+      </div>
+      <div class="info-item">
+        <span class="info-key">Sex</span>
+        <span class="info-value">Male</span>
+      </div>
+      <div class="info-item">
+        <span class="info-key">Age</span>
+        <span class="info-value">10 years old</span>
+      </div>
+      <div class="info-item full">
+        <span class="info-key">Home Address</span>
+        <span class="info-value">San Jose, Rodriguez, Rizal, Metro Manila Hills, Lot 10 BLK 13 Mulawin St.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIMARY CONTACT -->
+  <div class="card">
+    <div class="card-label">Primary Contact Person</div>
+    <div class="contact-card">
+      <div class="contact-icon primary">👩</div>
+      <div class="contact-info">
+        <div class="contact-name">Edmalyn Rosales</div>
+        <div class="contact-relation">Mother</div>
+        <div class="contact-phone">+63 910 449 8817 </div>
+      </div>
+      <span class="contact-tag tag-primary">PRIMARY</span>
+    </div>
+    <a href="tel:+639104498817" class="call-btn green">📞 Call Primary Contact</a>
+  </div>
+
+  <!-- SECONDARY CONTACT -->
+  <div class="card">
+    <div class="card-label">Secondary Contact Person</div>
+    <div class="contact-card">
+      <div class="contact-icon secondary">👨</div>
+      <div class="contact-info">
+        <div class="contact-name"> Joshua Napod</div>
+        <div class="contact-relation"> Father </div>
+        <div class="contact-phone">+63 964 959 7054</div>
+      </div>
+      <span class="contact-tag tag-secondary">SECONDARY</span>
+    </div>
+    <a href="tel:+639649597054" class="call-btn blue">📞 Call Secondary Contact</a>
+  </div>
+
+  <!-- INSTITUTIONAL & LOCAL INFO -->
+  <div class="card">
+    <div class="card-label">Institutional & Local Information</div>
+
+    <div class="inst-row">
+      <div class="inst-icon">🏫</div>
+      <div class="inst-info">
+        <div class="inst-label"> School</div>
+        <div class="inst-value"> Tagumpay Elementary School</div>
+        <div class="inst-sub"> Rodriguez Rizal · (02) 638 4728</div>
+      </div>
+    </div>
+
+    <div class="inst-row">
+      <div class="inst-icon">📞</div>
+      <div class="inst-info">
+        <div class="inst-label"> National Hotline</div>
+        <div class="inst-value"> 911 · Emergency Response</div>
+        <div class="inst-sub"> Red Cross: 143</div>
+      </div>
+    </div>
+
+    <div class="inst-row">
+      <div class="inst-icon">🚔</div>
+      <div class="inst-info">
+        <div class="inst-label">Local Police</div>
+        <div class="inst-value"> PSC Building, E. Rodriguez Highway, Rodriguez, Rizal.</div>
+        <div class="inst-sub"> Mobile Hotline: +63 999 195 5988 · Station Landline: (02) 8633-9263</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    ⚠️ This information is confidential. For emergency use only.<br>
+    Profile last updated June 2026
+  </div>
+
+</div>
+
+<script>
+  // Show current time on banner
+  document.getElementById('scanTime').textContent =
+    new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  const emergencyContacts = ["edz7492@gmail.com"];
+  const emailStatus = document.getElementById('emailStatus');
+
+  function setEmailStatus(message, isError = false) {
+    if (!emailStatus) return;
+    emailStatus.textContent = message;
+    emailStatus.classList.toggle('offline', isError);
+  }
+
+  // Function to send alert email via EmailJS
+  function sendEmailAlert() {
+    const scanTime = new Date().toLocaleString();
+    setEmailStatus('⏳ Sending alert email...');
+
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+
+        executeEmailJS(scanTime, latitude, longitude, googleMapsLink);
+      },
+      function(error) {
+        console.error("Location access denied: ", error);
+        executeEmailJS(scanTime, "Not Available", "Not Available", "Location permission denied");
+      }
+    );
+  }
+
+  function executeEmailJS(scanTime, lat, lng, mapsLink) {
+    if (!window.emailjs || typeof emailjs.send !== 'function') {
+      console.error('EmailJS is not loaded or available');
+      setEmailStatus('⚠️ Email service is unavailable. Please refresh and try again.', true);
+      return;
+    }
+
+    if (!Array.isArray(emergencyContacts) || emergencyContacts.length === 0) {
+      setEmailStatus('⚠️ No recipient email is configured.', true);
+      return;
+    }
+
+    const sendPromises = emergencyContacts.map(contactEmail => {
+      return emailjs.send("service_6r1kjhp", "template_w49es4g", 
+      {
+        to_email: contactEmail,
+        person_name: "Elishua Jude Rosales",
+        scan_time: scanTime,
+        latitude: lat,
+        longitude: lng,
+        maps_link: mapsLink
+      })
+      .then(response => {
+        console.log(`Email sent to ${contactEmail}`, response);
+        return { contactEmail, success: true };
+      })
+      .catch(error => {
+        console.error(`Email failed for ${contactEmail}`, error);
+        return { contactEmail, success: false, error };
+      });
+    });
+
+    Promise.all(sendPromises).then(results => {
+      const successCount = results.filter(r => r.success).length;
+      const failedCount = results.filter(r => !r.success).length;
+
+      if (successCount > 0 && failedCount === 0) {
+        setEmailStatus(`✅ Alert email sent to ${successCount} recipient(s).`);
+      } else if (successCount > 0) {
+        setEmailStatus(`⚠️ Sent to ${successCount}, but ${failedCount} failed. Check console for details.`, true);
+      } else {
+        setEmailStatus('⚠️ Alert email could not be sent. Check the console and EmailJS configuration.', true);
+      }
+    });
+  }
+
+  // Monitor Connection Status
+  window.onload = function () {
+    const alertBanner = document.getElementById('alertBanner');
+    const bannerText = document.getElementById('bannerText');
+
+    if (navigator.onLine) {
+      // ONLINE: Proceed with EmailJS alert tracking
+      sendEmailAlert();
+    } else {
+      // OFFLINE: Adjust elements to reflect offline status gracefully
+      alertBanner.classList.add('offline');
+      bannerText.textContent = "Viewing Profile Offline — No Network Connection";
+      
+      setEmailStatus("⚠️ Device is offline. Automated email alert could not be sent, but emergency profiles remain accessible.", true);
+    }
+  };
+</script>
+
+</body>
+</html>
